@@ -1,98 +1,345 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+} from 'react-native'
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useSensores } from '../../hooks/useSensores'
+import { SensorList } from '../../components/SensorList'
+import { SensorForm } from '../../components/SensorForm'
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+  const {
+    sensores,
+    loading,
+    error,
+    criar,
+    atualizar,
+    deletar,
+  } = useSensores()
+
+  const [sensorSelecionado, setSensorSelecionado] =
+    useState<any>(null)
+
+  const [modalVisivel, setModalVisivel] =
+    useState(false)
+
+  const handleCriar = async (dados: any) => {
+
+    try {
+
+      await criar(dados)
+
+      setModalVisivel(false)
+
+      setSensorSelecionado(null)
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao criar:',
+        err
+      )
+
+    }
+
+  }
+
+  const handleAtualizar = async (
+    dados: any
+  ) => {
+
+    try {
+
+      if (sensorSelecionado !== null) {
+
+        await atualizar(
+          sensorSelecionado.id,
+          dados
+        )
+
+        setModalVisivel(false)
+
+        setSensorSelecionado(null)
+
+      }
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao atualizar:',
+        err
+      )
+
+    }
+
+  }
+
+  const handleDeletar = async (
+    id: number
+  ) => {
+
+    try {
+
+      await deletar(id)
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao deletar:',
+        err
+      )
+
+    }
+
+  }
+
+  const abrirFormulario = (
+    sensor: any = null
+  ) => {
+
+    setSensorSelecionado(sensor)
+
+    setModalVisivel(true)
+
+  }
+
+  return (
+
+    <View style={styles.container}>
+
+      <View style={styles.header}>
+
+        <Text style={styles.title}>
+
+          📊 Monitoramento de Sensores
+
+        </Text>
+
+        {error && (
+
+          <Text style={styles.error}>
+
+            {error}
+
+          </Text>
+
+        )}
+
+      </View>
+
+      <SensorList
+        sensores={sensores}
+        loading={loading}
+        onEdit={abrirFormulario}
+        onDelete={handleDeletar}
+      />
+
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() =>
+          abrirFormulario()
+        }>
+
+        <Text style={styles.fabText}>
+
+          +
+
+        </Text>
+
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisivel}
+        animationType="slide"
+        onRequestClose={() => {
+
+          setModalVisivel(false)
+
+          setSensorSelecionado(null)
+
+        }}>
+
+        <View style={styles.modalHeader}>
+
+          <TouchableOpacity
+            onPress={() => {
+
+              setModalVisivel(false)
+
+              setSensorSelecionado(null)
+
+            }}>
+
+            <Text style={styles.closeBtn}>
+
+              ✕
+
+            </Text>
+
+          </TouchableOpacity>
+
+          <Text style={styles.modalTitle}>
+
+            {sensorSelecionado
+              ? 'Editar Sensor'
+              : 'Novo Sensor'}
+
+          </Text>
+
+          <View style={{ width: 40 }} />
+
+        </View>
+
+        <SensorForm
+          sensor={sensorSelecionado}
+          loading={loading}
+          onSubmit={
+            sensorSelecionado
+              ? handleAtualizar
+              : handleCriar
+          }
+        />
+
+      </Modal>
+
+    </View>
+
+  )
+
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+
+  container: {
+
+    flex: 1,
+
+    backgroundColor: '#f5f5f5',
+
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  header: {
+
+    backgroundColor: '#007AFF',
+
+    paddingVertical: 20,
+
+    paddingHorizontal: 15,
+
+    paddingTop: 40,
+
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+
+  title: {
+
+    fontSize: 24,
+
+    fontWeight: 'bold',
+
+    color: '#fff',
+
+    marginBottom: 5,
+
+  },
+
+  error: {
+
+    color: '#FF3B30',
+
+    fontSize: 14,
+
+    marginTop: 5,
+
+  },
+
+  fab: {
+
     position: 'absolute',
+
+    bottom: 20,
+
+    right: 20,
+
+    width: 60,
+
+    height: 60,
+
+    borderRadius: 30,
+
+    backgroundColor: '#34C759',
+
+    justifyContent: 'center',
+
+    alignItems: 'center',
+
+    shadowColor: '#000',
+
+    shadowOffset: {
+
+      width: 0,
+      height: 2,
+
+    },
+
+    shadowOpacity: 0.3,
+
+    shadowRadius: 4,
+
+    elevation: 5,
+
   },
-});
+
+  fabText: {
+
+    color: '#fff',
+
+    fontSize: 30,
+
+    fontWeight: 'bold',
+
+  },
+
+  modalHeader: {
+
+    flexDirection: 'row',
+
+    justifyContent: 'space-between',
+
+    alignItems: 'center',
+
+    paddingHorizontal: 15,
+
+    paddingVertical: 15,
+
+    backgroundColor: '#007AFF',
+
+    paddingTop: 50,
+
+  },
+
+  modalTitle: {
+
+    fontSize: 18,
+
+    fontWeight: 'bold',
+
+    color: '#fff',
+
+  },
+
+  closeBtn: {
+
+    fontSize: 28,
+
+    color: '#fff',
+
+    fontWeight: 'bold',
+
+  },
+
+})
