@@ -1,0 +1,87 @@
+body {
+
+    background-color: #f1f5f9;
+
+}
+
+.card {
+
+    border-radius: 18px;
+
+}
+
+.card-info {
+
+    background: linear-gradient(
+        135deg,
+        #0ea5e9,
+        #2563eb
+    );
+
+    color: white;
+
+}
+
+.card-success {
+
+    background: linear-gradient(
+        135deg,
+        #22c55e,
+        #15803d
+    );
+
+    color: white;
+
+}
+
+.card-danger {
+
+    background: linear-gradient(
+        135deg,
+        #ef4444,
+        #b91c1c
+    );
+
+    color: white;
+
+}
+
+.card-warning {
+
+    background: linear-gradient(
+        135deg,
+        #f59e0b,
+        #d97706
+    );
+
+    color: white;
+
+}
+
+.navbar {
+
+    padding: 18px;
+
+}
+
+table {
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+}
+
+h1 {
+
+    font-weight: bold;
+
+}
+
+.grafico-container {
+
+    max-width: 350px;
+
+    margin: auto;
+
+}
