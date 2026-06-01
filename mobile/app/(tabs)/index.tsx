@@ -114,18 +114,57 @@ export default function HomeScreen() {
 
       <View style={styles.header}>
 
-        <Text style={styles.title}>
-
-          📊 Monitoramento de Sensores
-
+        <Text style={styles.welcome}>
+          Olá 👋
         </Text>
+
+        <Text style={styles.title}>
+          SmartMonitor
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Plataforma de Monitoramento IoT
+        </Text>
+
+        <View style={styles.statsContainer}>
+
+          <View style={styles.statCard}>
+
+            <Text style={styles.statValue}>
+              {sensores.length}
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Dispositivos
+            </Text>
+
+          </View>
+
+          <View style={styles.statCard}>
+
+            <Text style={styles.statValue}>
+              {
+                sensores.filter(
+                  sensor =>
+                    sensor.status
+                      ?.toLowerCase()
+                      .includes('conect')
+                ).length
+              }
+            </Text>
+
+            <Text style={styles.statLabel}>
+              Online
+            </Text>
+
+          </View>
+
+        </View>
 
         {error && (
 
           <Text style={styles.error}>
-
             {error}
-
           </Text>
 
         )}
@@ -143,12 +182,11 @@ export default function HomeScreen() {
         style={styles.fab}
         onPress={() =>
           abrirFormulario()
-        }>
+        }
+      >
 
         <Text style={styles.fabText}>
-
           +
-
         </Text>
 
       </TouchableOpacity>
@@ -162,7 +200,8 @@ export default function HomeScreen() {
 
           setSensorSelecionado(null)
 
-        }}>
+        }}
+      >
 
         <View style={styles.modalHeader}>
 
@@ -173,12 +212,11 @@ export default function HomeScreen() {
 
               setSensorSelecionado(null)
 
-            }}>
+            }}
+          >
 
             <Text style={styles.closeBtn}>
-
               ✕
-
             </Text>
 
           </TouchableOpacity>
@@ -186,12 +224,16 @@ export default function HomeScreen() {
           <Text style={styles.modalTitle}>
 
             {sensorSelecionado
-              ? 'Editar Sensor'
-              : 'Novo Sensor'}
+              ? 'Editar Dispositivo'
+              : 'Novo Dispositivo'}
 
           </Text>
 
-          <View style={{ width: 40 }} />
+          <View
+            style={{
+              width: 40,
+            }}
+          />
 
         </View>
 
@@ -219,41 +261,97 @@ const styles = StyleSheet.create({
 
     flex: 1,
 
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0F172A',
 
   },
 
   header: {
 
-    backgroundColor: '#007AFF',
+    paddingTop: 60,
 
-    paddingVertical: 20,
+    paddingHorizontal: 20,
 
-    paddingHorizontal: 15,
+    paddingBottom: 25,
 
-    paddingTop: 40,
+    backgroundColor: '#0F172A',
+
+  },
+
+  welcome: {
+
+    color: '#94A3B8',
+
+    fontSize: 16,
 
   },
 
   title: {
 
-    fontSize: 24,
+    color: '#FFFFFF',
+
+    fontSize: 34,
+
+    fontWeight: '900',
+
+    marginTop: 4,
+
+  },
+
+  subtitle: {
+
+    color: '#CBD5E1',
+
+    marginTop: 4,
+
+    fontSize: 15,
+
+  },
+
+  statsContainer: {
+
+    flexDirection: 'row',
+
+    gap: 12,
+
+    marginTop: 20,
+
+  },
+
+  statCard: {
+
+    flex: 1,
+
+    backgroundColor: '#1E293B',
+
+    padding: 18,
+
+    borderRadius: 18,
+
+  },
+
+  statValue: {
+
+    color: '#FFFFFF',
+
+    fontSize: 26,
 
     fontWeight: 'bold',
 
-    color: '#fff',
+  },
 
-    marginBottom: 5,
+  statLabel: {
+
+    color: '#94A3B8',
+
+    marginTop: 4,
 
   },
 
   error: {
 
-    color: '#FF3B30',
+    color: '#EF4444',
 
-    fontSize: 14,
-
-    marginTop: 5,
+    marginTop: 12,
 
   },
 
@@ -261,17 +359,17 @@ const styles = StyleSheet.create({
 
     position: 'absolute',
 
-    bottom: 20,
+    bottom: 25,
 
     right: 20,
 
-    width: 60,
+    width: 70,
 
-    height: 60,
+    height: 70,
 
-    borderRadius: 30,
+    borderRadius: 35,
 
-    backgroundColor: '#34C759',
+    backgroundColor: '#3B82F6',
 
     justifyContent: 'center',
 
@@ -279,26 +377,19 @@ const styles = StyleSheet.create({
 
     shadowColor: '#000',
 
-    shadowOffset: {
-
-      width: 0,
-      height: 2,
-
-    },
-
     shadowOpacity: 0.3,
 
-    shadowRadius: 4,
+    shadowRadius: 10,
 
-    elevation: 5,
+    elevation: 10,
 
   },
 
   fabText: {
 
-    color: '#fff',
+    color: '#FFFFFF',
 
-    fontSize: 30,
+    fontSize: 34,
 
     fontWeight: 'bold',
 
@@ -312,31 +403,31 @@ const styles = StyleSheet.create({
 
     alignItems: 'center',
 
-    paddingHorizontal: 15,
+    backgroundColor: '#0F172A',
 
-    paddingVertical: 15,
+    paddingTop: 60,
 
-    backgroundColor: '#007AFF',
+    paddingBottom: 20,
 
-    paddingTop: 50,
+    paddingHorizontal: 20,
 
   },
 
   modalTitle: {
 
-    fontSize: 18,
+    color: '#FFFFFF',
+
+    fontSize: 20,
 
     fontWeight: 'bold',
-
-    color: '#fff',
 
   },
 
   closeBtn: {
 
-    fontSize: 28,
+    color: '#FFFFFF',
 
-    color: '#fff',
+    fontSize: 28,
 
     fontWeight: 'bold',
 
