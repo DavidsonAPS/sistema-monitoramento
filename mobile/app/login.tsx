@@ -8,9 +8,9 @@ import {
   Alert,
 } from 'react-native'
 
-import axios from 'axios'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { apiClient } from '../lib/api'
 
 export default function Login() {
 
@@ -53,13 +53,14 @@ export default function Login() {
 
     try {
 
-      const response = await axios.post(
-        'http://192.168.0.191:3000/login',
-        {
-          email,
-          senha,
-        }
-      )
+      const response =
+        await apiClient.post(
+          '/login',
+          {
+            email,
+            senha,
+          }
+        )
 
       await AsyncStorage.setItem(
         'usuario',
@@ -80,7 +81,9 @@ export default function Login() {
 
       router.replace('/(tabs)')
 
-    } catch {
+    } catch (error) {
+
+      console.log(error)
 
       Alert.alert(
         'Erro',

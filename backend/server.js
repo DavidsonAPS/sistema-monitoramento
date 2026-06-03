@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -25,6 +27,184 @@ const pool = new Pool({
 
 });
 
+app.get('/', (req, res) => {
+
+  res.json({
+
+    status: 'online',
+
+    mensagem: 'API SmartMonitor funcionando',
+
+  })
+
+})
+
+// =========================
+// REGISTER
+// =========================
+
+app.post('/register', async (req, res) => {
+
+  const {
+    nome,
+    email,
+    senha,
+  } = req.body;
+
+  try {
+
+    const usuarioExistente =
+      await pool.query(
+        'SELECT * FROM usuarios WHERE email = $1',
+        [email]
+      );
+
+    if (
+      usuarioExistente.rows.length > 0
+    ) {
+
+      return res.status(400).json({
+        erro: 'Email já cadastrado'
+      });
+
+    }
+
+    const senhaHash =
+      await bcrypt.hash(
+        senha,
+        10
+      );
+
+    const resultado =
+      await pool.query(
+        `
+        INSERT INTO usuarios
+        (
+          nome,
+          email,
+          senha
+        )
+
+        VALUES
+        (
+          $1,
+          $2,
+          $3
+        )
+
+        RETURNING
+        id,
+        nome,
+        email
+        `,
+        [
+          nome,
+          email,
+          senhaHash
+        ]
+      );
+
+    res.status(201).json(
+      resultado.rows[0]
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      erro: 'Erro ao cadastrar usuário'
+    });
+
+  }
+
+});
+
+// =========================
+// LOGIN
+// =========================
+
+app.post('/login', async (req, res) => {
+
+  const {
+    email,
+    senha,
+  } = req.body;
+
+  try {
+
+    const resultado =
+      await pool.query(
+        'SELECT * FROM usuarios WHERE email = $1',
+        [email]
+      );
+
+    if (
+      resultado.rows.length === 0
+    ) {
+
+      return res.status(401).json({
+        erro: 'Email ou senha inválidos'
+      });
+
+    }
+
+    const usuario =
+      resultado.rows[0];
+
+    const senhaValida =
+      await bcrypt.compare(
+        senha,
+        usuario.senha
+      );
+
+    if (!senhaValida) {
+
+      return res.status(401).json({
+        erro: 'Email ou senha inválidos'
+      });
+
+    }
+
+    const token =
+      jwt.sign(
+        {
+          id: usuario.id,
+          email: usuario.email,
+        },
+        'projetoA3SuperSecreto2026',
+        {
+          expiresIn: '7d',
+        }
+      );
+
+    res.json({
+
+      token,
+
+      usuario: {
+
+        id: usuario.id,
+
+        nome: usuario.nome,
+
+        email: usuario.email,
+
+      },
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      erro: 'Erro ao fazer login'
+    });
+
+  }
+
+});
 
 // =========================
 // LISTAR DISPOSITIVOS
@@ -51,7 +231,6 @@ app.get('/sensores', async (req, res) => {
   }
 
 });
-
 
 // =========================
 // BUSCAR POR ID
@@ -90,7 +269,6 @@ app.get('/sensores/:id', async (req, res) => {
 
 });
 
-
 // =========================
 // CRIAR
 // =========================
@@ -102,6 +280,7 @@ app.post('/sensores', async (req, res) => {
     sensor,
     status,
     valor,
+    usuario_id,
   } = req.body;
 
   try {
@@ -113,10 +292,18 @@ app.post('/sensores', async (req, res) => {
         dispositivo,
         sensor,
         status,
-        valor
+        valor,
+        usuario_id
       )
 
-      VALUES ($1, $2, $3, $4)
+      VALUES
+      (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+      )
 
       RETURNING *
       `,
@@ -125,6 +312,7 @@ app.post('/sensores', async (req, res) => {
         sensor,
         status,
         valor,
+        usuario_id || null,
       ]
     );
 
@@ -143,7 +331,6 @@ app.post('/sensores', async (req, res) => {
   }
 
 });
-
 
 // =========================
 // ATUALIZAR
@@ -207,7 +394,6 @@ app.put('/sensores/:id', async (req, res) => {
 
 });
 
-
 // =========================
 // DELETAR
 // =========================
@@ -240,15 +426,26 @@ app.delete('/sensores/:id', async (req, res) => {
 
 });
 
-
 // =========================
 // SERVIDOR
 // =========================
 
-app.listen(3000, '0.0.0.0', () => {
+app.get('/teste', (req, res) => {
+
+  res.json({
+    ok: true,
+    mensagem: 'Servidor atualizado'
+  })
+
+})
+
+const PORT =
+  process.env.PORT || 3000
+
+app.listen(PORT, '0.0.0.0', () => {
 
   console.log(
-    'Servidor rodando na porta 3000'
-  );
+    `Servidor rodando na porta ${PORT}`
+  )
 
-});
+})

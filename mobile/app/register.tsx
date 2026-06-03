@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native'
-import axios from 'axios'
+
 import { router } from 'expo-router'
+import { apiClient } from '../lib/api'
 
 export default function Register() {
 
@@ -26,12 +27,13 @@ export default function Register() {
       )
 
       return
+
     }
 
     try {
 
-      await axios.post(
-        'http://192.168.0.191:3000/register',
+      await apiClient.post(
+        '/register',
         {
           nome,
           email,
@@ -47,6 +49,8 @@ export default function Register() {
       router.replace('/login')
 
     } catch (error: any) {
+
+      console.log(error?.response?.data)
 
       Alert.alert(
         'Erro',
