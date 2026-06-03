@@ -45,6 +45,9 @@ app.get('/', (req, res) => {
 
 app.post('/register', async (req, res) => {
 
+  console.log('REGISTER RECEBIDO')
+  console.log(req.body)
+
   const {
     nome,
     email,
