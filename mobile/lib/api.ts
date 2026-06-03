@@ -4,19 +4,32 @@ const API_BASE_URL =
   'https://sistema-monitoramento-4sts.onrender.com'
 
 export const apiClient = axios.create({
-
   baseURL: API_BASE_URL,
-
   headers: {
     'Content-Type': 'application/json',
   },
-
 })
+
+apiClient.interceptors.request.use(
+  (config) => {
+
+    console.log(
+      'URL:',
+      `${config.baseURL}${config.url}`
+    )
+
+    return config
+  }
+)
 
 export const sensoresAPI = {
 
-  listar: () =>
-    apiClient.get('/sensores'),
+  listarPorUsuario: (
+    usuarioId: number
+  ) =>
+    apiClient.get(
+      `/sensores/${usuarioId}/lista`
+    ),
 
   buscar: (id: number) =>
     apiClient.get(`/sensores/${id}`),

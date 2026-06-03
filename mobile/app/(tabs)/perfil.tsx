@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { router } from 'expo-router'
+import { useEffect, useState } from 'react'
 
 export default function Perfil() {
 
@@ -24,16 +23,24 @@ export default function Perfil() {
   const carregarUsuario =
     async () => {
 
-      const dados =
-        await AsyncStorage.getItem(
-          'usuario'
-        )
+      try {
 
-      if (dados) {
+        const dados =
+          await AsyncStorage.getItem(
+            'usuario'
+          )
 
-        setUsuario(
-          JSON.parse(dados)
-        )
+        if (dados) {
+
+          setUsuario(
+            JSON.parse(dados)
+          )
+
+        }
+
+      } catch (error) {
+
+        console.log(error)
 
       }
 
@@ -41,42 +48,15 @@ export default function Perfil() {
 
   const sair = async () => {
 
-    Alert.alert(
-
-      'Sair',
-
-      'Deseja realmente sair?',
-
-      [
-
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-
-        {
-
-          text: 'Sair',
-
-          onPress: async () => {
-
-            await AsyncStorage.removeItem(
-              'usuario'
-            )
-
-            await AsyncStorage.removeItem(
-              'token'
-            )
-
-            router.replace('/login')
-
-          },
-
-        },
-
-      ]
-
+    await AsyncStorage.removeItem(
+      'usuario'
     )
+
+    await AsyncStorage.removeItem(
+      'token'
+    )
+
+    router.replace('/login')
 
   }
 
@@ -84,28 +64,36 @@ export default function Perfil() {
 
     <View style={styles.container}>
 
-      <Text style={styles.avatar}>
-        👤
-      </Text>
+      <View style={styles.card}>
 
-      <Text style={styles.nome}>
-        {usuario?.nome || 'Usuário'}
-      </Text>
-
-      <Text style={styles.email}>
-        {usuario?.email || ''}
-      </Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={sair}
-      >
-
-        <Text style={styles.buttonText}>
-          Sair
+        <Text style={styles.avatar}>
+          👤
         </Text>
 
-      </TouchableOpacity>
+        <Text style={styles.nome}>
+          {usuario?.nome || 'Usuário'}
+        </Text>
+
+        <Text style={styles.email}>
+          {usuario?.email || ''}
+        </Text>
+
+        <Text style={styles.id}>
+          ID: {usuario?.id || '-'}
+        </Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={sair}
+        >
+
+          <Text style={styles.buttonText}>
+            Sair
+          </Text>
+
+        </TouchableOpacity>
+
+      </View>
 
     </View>
 
@@ -116,41 +104,93 @@ export default function Perfil() {
 const styles = StyleSheet.create({
 
   container: {
+
     flex: 1,
+
     backgroundColor: '#0F172A',
+
     justifyContent: 'center',
+
     alignItems: 'center',
+
+    padding: 20,
+
+  },
+
+  card: {
+
+    width: '100%',
+
+    backgroundColor: '#1E293B',
+
+    borderRadius: 25,
+
+    padding: 30,
+
+    alignItems: 'center',
+
   },
 
   avatar: {
+
     fontSize: 90,
+
   },
 
   nome: {
+
     color: '#FFF',
+
     fontSize: 26,
+
     fontWeight: 'bold',
-    marginTop: 10,
+
+    marginTop: 15,
+
   },
 
   email: {
+
     color: '#94A3B8',
+
+    marginTop: 10,
+
+    fontSize: 15,
+
+  },
+
+  id: {
+
+    color: '#64748B',
+
     marginTop: 8,
-    fontSize: 16,
+
+    fontSize: 13,
+
   },
 
   button: {
-    marginTop: 40,
+
+    marginTop: 30,
+
     backgroundColor: '#EF4444',
+
     paddingHorizontal: 35,
+
     paddingVertical: 15,
-    borderRadius: 14,
+
+    borderRadius: 15,
+
   },
 
   buttonText: {
+
     color: '#FFF',
+
     fontWeight: 'bold',
+
     fontSize: 16,
+
   },
 
 })

@@ -213,27 +213,38 @@ app.post('/login', async (req, res) => {
 // LISTAR DISPOSITIVOS
 // =========================
 
-app.get('/sensores', async (req, res) => {
+app.get('/sensores/:usuario_id/lista', async (req, res) => {
+
+  const { usuario_id } = req.params
 
   try {
 
     const resultado = await pool.query(
-      'SELECT * FROM sensores ORDER BY id ASC'
-    );
 
-    res.json(resultado.rows);
+      `
+      SELECT *
+      FROM sensores
+      WHERE usuario_id = $1
+      ORDER BY id ASC
+      `,
+
+      [usuario_id]
+
+    )
+
+    res.json(resultado.rows)
 
   } catch (error) {
 
-    console.error(error);
+    console.error(error)
 
     res.status(500).json({
-      erro: 'Erro ao buscar dispositivos',
-    });
+      erro: 'Erro ao buscar dispositivos'
+    })
 
   }
 
-});
+})
 
 // =========================
 // BUSCAR POR ID

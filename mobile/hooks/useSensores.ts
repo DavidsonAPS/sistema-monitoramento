@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useState, useEffect } from 'react'
+
 import { sensoresAPI } from '../lib/api'
 
 import * as Battery from 'expo-battery'
@@ -38,18 +40,37 @@ export function useSensores() {
 
     try {
 
-      const response =
-        await sensoresAPI.listar()
+      const usuario =
+        await AsyncStorage.getItem(
+          'usuario'
+        )
 
-      setSensores(response.data)
+      if (!usuario)
+        return []
+
+      const dados =
+        JSON.parse(usuario)
+
+      const response =
+        await sensoresAPI
+          .listarPorUsuario(
+            dados.id
+          )
+
+      setSensores(
+        response.data
+      )
 
       return response.data
 
     } catch (err: any) {
 
       setError(
+
         err.message ||
+
         'Erro ao listar sensores'
+
       )
 
       return []
@@ -62,24 +83,42 @@ export function useSensores() {
   // SALVAR SENSOR
   // =========================
 
-  const salvarSensor =
-    async (
-      dispositivo: string,
-      sensor: string,
-      status: string,
-      valor: any
-    ) => {
+  const salvarSensor = async (
+
+    dispositivo: string,
+
+    sensor: string,
+
+    status: string,
+
+    valor: any
+
+  ) => {
 
     try {
 
-      const response =
-        await sensoresAPI.listar()
+      const usuario =
+        await AsyncStorage.getItem(
+          'usuario'
+        )
 
-      const sensores =
+      if (!usuario)
+        return
+
+      const usuarioLogado =
+        JSON.parse(usuario)
+
+      const response =
+        await sensoresAPI
+          .listarPorUsuario(
+            usuarioLogado.id
+          )
+
+      const sensoresExistentes =
         response.data
 
       const existente =
-        sensores.find(
+        sensoresExistentes.find(
           (item: Sensor) =>
 
             item.dispositivo ===
@@ -87,7 +126,6 @@ export function useSensores() {
 
             item.sensor ===
               sensor
-
         )
 
       const dados = {
@@ -100,6 +138,9 @@ export function useSensores() {
 
         valor,
 
+        usuario_id:
+          usuarioLogado.id,
+
       }
 
       if (existente?.id) {
@@ -109,9 +150,7 @@ export function useSensores() {
           dados
         )
 
-      }
-
-      else {
+      } else {
 
         await sensoresAPI.criar(
           dados
@@ -137,114 +176,118 @@ export function useSensores() {
   const atualizarIoT =
     async () => {
 
-    try {
+      try {
 
-      const modelo =
-        Device.modelName ||
-        'Smartphone'
+        const modelo =
+          Device.modelName ||
+          'Smartphone'
 
-      // =========================
-      // BATERIA
-      // =========================
+        // =========================
+        // BATERIA
+        // =========================
 
-      const batteryLevel =
-        await Battery.getBatteryLevelAsync()
+        const batteryLevel =
+          await Battery.getBatteryLevelAsync()
 
-      const porcentagem =
-        Math.round(
-          batteryLevel * 100
+        const porcentagem =
+          Math.round(
+            batteryLevel * 100
+          )
+
+        const batteryState =
+          await Battery.getBatteryStateAsync()
+
+        let statusBateria =
+          '❌ Cabo desconectado'
+
+        if (
+
+          batteryState ===
+          Battery.BatteryState.CHARGING
+
+        ) {
+
+          statusBateria =
+            '🔌 Cabo conectado'
+
+        }
+
+        else if (
+
+          batteryState ===
+          Battery.BatteryState.FULL
+
+        ) {
+
+          statusBateria =
+            '⚡ Bateria cheia'
+
+        }
+
+        await salvarSensor(
+
+          modelo,
+
+          'Bateria',
+
+          statusBateria,
+
+          `${porcentagem}%`
+
         )
 
-      const batteryState =
-        await Battery.getBatteryStateAsync()
+        // =========================
+        // INTERNET
+        // =========================
 
-      let statusBateria =
-        '❌ Cabo desconectado'
+        const network =
+          await Network.getNetworkStateAsync()
 
-      if (
-        batteryState ===
-        Battery.BatteryState.CHARGING
-      ) {
+        let internet =
+          'Offline'
 
-        statusBateria =
-          '🔌 Cabo conectado'
+        if (
+          network.isConnected
+        ) {
 
-      }
+          internet =
+            network.type ||
+            'Online'
 
-      else if (
-        batteryState ===
-        Battery.BatteryState.FULL
-      ) {
+        }
 
-        statusBateria =
-          '⚡ Bateria cheia'
+        await salvarSensor(
 
-      }
+          modelo,
 
-      await salvarSensor(
+          'Internet',
 
-        modelo,
+          '🌐 Conectado',
 
-        'Bateria',
+          internet
 
-        statusBateria,
+        )
 
-        `${porcentagem}%`
+        // =========================
+        // REFRESH
+        // =========================
 
-      )
+        await listar()
 
-      // =========================
-      // INTERNET
-      // =========================
+        console.log(
+          'IoT atualizado!'
+        )
 
-      const network =
-        await Network.getNetworkStateAsync()
+      } catch (err) {
 
-      let internet =
-        'Offline'
-
-      if (
-        network.isConnected
-      ) {
-
-        internet =
-          network.type ||
-          'Online'
+        console.log(
+          'Erro IoT:',
+          err
+        )
 
       }
-
-      await salvarSensor(
-
-        modelo,
-
-        'Internet',
-
-        '🌐 Conectado',
-
-        internet
-
-      )
-
-      // =========================
-      // REFRESH
-      // =========================
-
-      await listar()
-
-      console.log(
-        'IoT atualizado!'
-      )
-
-    } catch (err) {
-
-      console.log(
-        'Erro IoT:',
-        err
-      )
 
     }
-
-  }
 
   // =========================
   // CRUD
@@ -254,7 +297,9 @@ export function useSensores() {
     dados: Omit<Sensor, 'id'>
   ) => {
 
-    await sensoresAPI.criar(dados)
+    await sensoresAPI.criar(
+      dados
+    )
 
     await listar()
 
@@ -278,7 +323,9 @@ export function useSensores() {
     id: number
   ) => {
 
-    await sensoresAPI.deletar(id)
+    await sensoresAPI.deletar(
+      id
+    )
 
     await listar()
 
@@ -302,7 +349,9 @@ export function useSensores() {
       }, 5000)
 
     return () =>
-      clearInterval(intervalo)
+      clearInterval(
+        intervalo
+      )
 
   }, [])
 
