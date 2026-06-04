@@ -433,15 +433,18 @@ await pool.query(
 
     res.json(resultado.rows[0]);
 
-  } catch (error) {
+ } catch (error) {
 
-    console.error(error);
+  console.error(
+    'ERRO COMPLETO:',
+    error
+  )
 
-    res.status(500).json({
-      erro: 'Erro ao atualizar dispositivo',
-    });
+  res.status(500).json({
+    erro: error.message
+  })
 
-  }
+}
 
 });
 
