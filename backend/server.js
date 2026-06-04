@@ -397,6 +397,11 @@ app.put('/sensores/:id', async (req, res) => {
     const sensorAtualizado =
   resultado.rows[0]
 
+  console.log(
+  'SALVANDO HISTORICO:',
+  sensorAtualizado
+)
+
 await pool.query(
   `
   INSERT INTO historico_sensores
