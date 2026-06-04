@@ -394,6 +394,38 @@ app.put('/sensores/:id', async (req, res) => {
 
     }
 
+    const sensorAtualizado =
+  resultado.rows[0]
+
+await pool.query(
+  `
+  INSERT INTO historico_sensores
+  (
+    usuario_id,
+    dispositivo,
+    sensor,
+    valor,
+    status
+  )
+
+  VALUES
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+  )
+  `,
+  [
+    sensorAtualizado.usuario_id,
+    sensorAtualizado.dispositivo,
+    sensorAtualizado.sensor,
+    sensorAtualizado.valor,
+    sensorAtualizado.status
+  ]
+)
+
     res.json(resultado.rows[0]);
 
   } catch (error) {

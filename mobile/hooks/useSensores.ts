@@ -173,122 +173,168 @@ export function useSensores() {
   // IOT REAL
   // =========================
 
-  const atualizarIoT =
-    async () => {
+  const atualizarIoT = async () => {
 
-      try {
+  try {
 
-        const modelo =
-          Device.modelName ||
-          'Smartphone'
+    const modelo =
+      Device.modelName ||
+      'Smartphone'
 
-        // =========================
-        // BATERIA
-        // =========================
+    // =========================
+    // BATERIA
+    // =========================
 
-        const batteryLevel =
-          await Battery.getBatteryLevelAsync()
+    const batteryLevel =
+      await Battery.getBatteryLevelAsync()
 
-        const porcentagem =
-          Math.round(
-            batteryLevel * 100
-          )
+    const porcentagem =
+      Math.round(
+        batteryLevel * 100
+      )
 
-        const batteryState =
-          await Battery.getBatteryStateAsync()
+    await salvarSensor(
 
-        let statusBateria =
-          '❌ Cabo desconectado'
+      modelo,
 
-        if (
+      'Bateria',
 
-          batteryState ===
-          Battery.BatteryState.CHARGING
+      'Ativo',
 
-        ) {
+      `${porcentagem}%`
 
-          statusBateria =
-            '🔌 Cabo conectado'
+    )
 
-        }
+    // =========================
+    // ENERGIA
+    // =========================
 
-        else if (
+    const batteryState =
+      await Battery.getBatteryStateAsync()
 
-          batteryState ===
-          Battery.BatteryState.FULL
+    let energia =
+      'Desconectado'
 
-        ) {
+    if (
 
-          statusBateria =
-            '⚡ Bateria cheia'
+      batteryState ===
+      Battery.BatteryState.CHARGING
 
-        }
+    ) {
 
-        await salvarSensor(
-
-          modelo,
-
-          'Bateria',
-
-          statusBateria,
-
-          `${porcentagem}%`
-
-        )
-
-        // =========================
-        // INTERNET
-        // =========================
-
-        const network =
-          await Network.getNetworkStateAsync()
-
-        let internet =
-          'Offline'
-
-        if (
-          network.isConnected
-        ) {
-
-          internet =
-            network.type ||
-            'Online'
-
-        }
-
-        await salvarSensor(
-
-          modelo,
-
-          'Internet',
-
-          '🌐 Conectado',
-
-          internet
-
-        )
-
-        // =========================
-        // REFRESH
-        // =========================
-
-        await listar()
-
-        console.log(
-          'IoT atualizado!'
-        )
-
-      } catch (err) {
-
-        console.log(
-          'Erro IoT:',
-          err
-        )
-
-      }
+      energia =
+        'Carregando'
 
     }
 
+    else if (
+
+      batteryState ===
+      Battery.BatteryState.FULL
+
+    ) {
+
+      energia =
+        'Bateria Cheia'
+
+    }
+
+    await salvarSensor(
+
+      modelo,
+
+      'Energia',
+
+      'Ativo',
+
+      energia
+
+    )
+
+    // =========================
+    // INTERNET
+    // =========================
+
+    const network =
+      await Network.getNetworkStateAsync()
+
+    let internet =
+      'Offline'
+
+    if (
+      network.isConnected
+    ) {
+
+      internet =
+        network.type ||
+        'Online'
+
+    }
+
+    await salvarSensor(
+
+      modelo,
+
+      'Internet',
+
+      'Conectado',
+
+      internet
+
+    )
+
+    // =========================
+    // MODELO
+    // =========================
+
+    await salvarSensor(
+
+      modelo,
+
+      'Modelo',
+
+      'Ativo',
+
+      modelo
+
+    )
+
+    // =========================
+    // SISTEMA
+    // =========================
+
+    await salvarSensor(
+
+      modelo,
+
+      'Sistema',
+
+      'Ativo',
+
+      `${Device.osName} ${Device.osVersion}`
+
+    )
+
+    // =========================
+    // REFRESH
+    // =========================
+
+    await listar()
+
+    console.log(
+      'IoT atualizado!'
+    )
+
+  } catch (err) {
+
+    console.log(
+      'Erro IoT:',
+      err
+    )
+
+  }
+
+}
   // =========================
   // CRUD
   // =========================

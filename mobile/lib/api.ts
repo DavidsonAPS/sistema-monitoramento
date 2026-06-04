@@ -13,11 +13,6 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
 
-    console.log(
-      'URL:',
-      `${config.baseURL}${config.url}`
-    )
-
     return config
   }
 )
