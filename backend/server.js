@@ -481,6 +481,40 @@ app.delete('/sensores/:id', async (req, res) => {
 });
 
 // =========================
+// HISTÓRICO
+// =========================
+
+app.get('/historico/:usuario_id', async (req, res) => {
+
+  const { usuario_id } = req.params
+
+  try {
+
+    const resultado = await pool.query(
+      `
+      SELECT *
+      FROM historico_sensores
+      WHERE usuario_id = $1
+      ORDER BY criado_em DESC
+      `,
+      [usuario_id]
+    )
+
+    res.json(resultado.rows)
+
+  } catch (error) {
+
+    console.error(error)
+
+    res.status(500).json({
+      erro: 'Erro ao buscar histórico'
+    })
+
+  }
+
+})
+
+// =========================
 // SERVIDOR
 // =========================
 

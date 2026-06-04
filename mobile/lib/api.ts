@@ -47,3 +47,14 @@ export const sensoresAPI = {
     ),
 
 }
+
+export const historicoAPI = {
+
+  listarPorUsuario: (
+    usuarioId: number
+  ) =>
+    apiClient.get(
+      `/historico/${usuarioId}`
+    ),
+
+}
