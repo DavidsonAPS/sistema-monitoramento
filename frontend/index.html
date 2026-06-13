@@ -25,19 +25,36 @@
 
     <nav class="navbar navbar-dark bg-dark shadow">
 
-        <div class="container-fluid">
+    <div class="container-fluid">
 
-            <span class="navbar-brand">
+        <span class="navbar-brand">
 
-                <i class="bi bi-cpu"></i>
+            <i class="bi bi-cpu"></i>
 
-                Sistema de Monitoramento
+            Sistema de Monitoramento
 
+        </span>
+
+        <div class="d-flex align-items-center gap-3">
+
+            <span
+                id="nomeUsuario"
+                class="text-white fw-bold">
             </span>
+
+            <button
+                onclick="logout()"
+                class="btn btn-danger btn-sm">
+
+                Sair
+
+            </button>
 
         </div>
 
-    </nav>
+    </div>
+
+</nav>
 
     <div class="container mt-4">
 
@@ -249,7 +266,7 @@
 
                         </thead>
 
-                        <tbody id="tabelaSensores">
+                        <div id="cardsSensores"></div>
 
                         </tbody>
 

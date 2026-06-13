@@ -392,7 +392,7 @@ export function useSensores() {
 
         atualizarIoT()
 
-      }, 5000)
+      }, 30000)
 
     return () =>
       clearInterval(

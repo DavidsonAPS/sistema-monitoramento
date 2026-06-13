@@ -367,15 +367,16 @@ app.put('/sensores/:id', async (req, res) => {
       `
       UPDATE sensores
 
-      SET
-        dispositivo = $1,
-        sensor = $2,
-        status = $3,
-        valor = $4
+SET
+  dispositivo = $1,
+  sensor = $2,
+  status = $3,
+  valor = $4,
+  created_at = NOW()
 
-      WHERE id = $5
+WHERE id = $5
 
-      RETURNING *
+RETURNING *
       `,
       [
         dispositivo,

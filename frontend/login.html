@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login SmartMonitor</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <h1>📡 SmartMonitor</h1>
+
+            <p>
+                Plataforma de Monitoramento IoT
+            </p>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Digite seu email"
+            >
+
+            <input
+                type="password"
+                id="senha"
+                placeholder="Digite sua senha"
+            >
+
+            <button onclick="fazerLogin()">
+                Entrar
+            </button>
+
+            <div id="erro"></div>
+
+        </div>
+
+    </div>
+
+    <script src="auth.js"></script>
+
+</body>
+
+</html>

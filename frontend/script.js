@@ -1,3 +1,35 @@
+const cardsSensores =
+document.getElementById(
+  'cardsSensores'
+)
+
+const API =
+'https://sistema-monitoramento-4sts.onrender.com'
+
+const usuario =
+JSON.parse(
+  localStorage.getItem('usuario')
+)
+
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+
+    document.getElementById(
+      'nomeUsuario'
+    ).innerText =
+      usuario.nome
+
+  }
+)
+
+if (!usuario) {
+
+  window.location.href =
+    'login.html'
+
+}
+
 const api = 'http://localhost:3000/sensores';
 
 const tabela = document.getElementById(
@@ -376,4 +408,125 @@ pesquisa.addEventListener('input', () => {
 
 });
 
-carregarSensores();
+async function carregarDispositivos() {
+
+  try {
+
+    const response =
+      await fetch(
+        `${API}/sensores/${usuario.id}/lista`
+      )
+
+    const sensores =
+      await response.json()
+      console.log(sensores[0])
+
+    totalSensores.innerText =
+      sensores.length
+
+    ativos.innerText =
+      sensores.filter(
+        s =>
+          s.status
+            .toLowerCase()
+            .includes('ativo')
+            ||
+          s.status
+            .toLowerCase()
+            .includes('conectado')
+      ).length
+
+    inativos.innerText =
+      sensores.length -
+      Number(ativos.innerText)
+
+    cardsSensores.innerHTML = ''
+
+    cardsSensores.innerHTML = ''
+
+const ultimaAtualizacao =
+  new Date(
+    sensores[0].created_at
+  )
+
+const agora =
+  new Date()
+
+const diferencaSegundos =
+  (agora - ultimaAtualizacao)
+  / 1000
+
+const online =
+  diferencaSegundos <= 30
+
+let html = `
+
+  <div class="card shadow border-0">
+
+    <div class="card-body">
+
+      <h3>
+        📱 iPhone 14
+      </h3>
+
+      <p
+        style="
+          font-weight:bold;
+          color:${
+            online
+              ? 'green'
+              : 'red'
+          };
+        "
+      >
+
+        ${
+          online
+            ? '🟢 Online'
+            : '🔴 Offline'
+        }
+
+      </p>
+
+      <small>
+
+        Última atualização:
+        ${ultimaAtualizacao.toLocaleString()}
+
+      </small>
+
+      <hr>
+
+`
+
+    cardsSensores.innerHTML =
+      html
+
+  }
+
+  catch(error) {
+
+    console.log(error)
+
+  }
+
+}
+
+carregarDispositivos();
+
+setInterval(() => {
+
+  carregarDispositivos()
+
+}, 5000)
+
+function logout() {
+
+  localStorage.removeItem(
+    'usuario'
+  )
+
+  window.location.href =
+    'login.html'
+
+}
