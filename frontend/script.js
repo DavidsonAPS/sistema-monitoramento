@@ -11,6 +11,11 @@ JSON.parse(
   localStorage.getItem('usuario')
 )
 
+document.getElementById(
+  'nomeUsuario'
+).innerText =
+  usuario.nome
+
 document.addEventListener(
   'DOMContentLoaded',
   () => {
@@ -36,10 +41,6 @@ const tabela = document.getElementById(
     'tabelaSensores'
 );
 
-const form = document.getElementById(
-    'sensorForm'
-);
-
 const totalSensores = document.getElementById(
     'totalSensores'
 );
@@ -56,9 +57,6 @@ const temperaturaMedia = document.getElementById(
     'temperaturaMedia'
 );
 
-const pesquisa = document.getElementById(
-    'pesquisa'
-);
 
 let grafico;
 
@@ -95,67 +93,59 @@ function renderizarTabela(sensores) {
 
     tabela.innerHTML = '';
 
-    sensores.forEach(sensor => {
+sensores.forEach(sensor => {
 
-        tabela.innerHTML += `
+    let icone = '📡'
 
-            <tr>
+    if (
+      sensor.sensor === 'Bateria'
+    )
+      icone = '🔋'
 
-                <td>${sensor.id}</td>
+    if (
+      sensor.sensor === 'Internet'
+    )
+      icone = '🌐'
 
-                <td>${sensor.nome}</td>
+    if (
+      sensor.sensor === 'Energia'
+    )
+      icone = '⚡'
 
-                <td>${sensor.localizacao}</td>
+    if (
+      sensor.sensor === 'Sistema'
+    )
+      icone = '📲'
 
-                <td>
+    if (
+      sensor.sensor === 'Modelo'
+    )
+      icone = '📱'
 
-                    <span class="badge
-                        ${sensor.status === 'Ativo'
-                            ? 'bg-success'
-                            : 'bg-danger'}">
+    html += `
 
-                        ${sensor.status}
+      <div
+        class="d-flex justify-content-between py-2"
+      >
 
-                    </span>
+        <strong>
 
-                </td>
+          ${icone}
+          ${sensor.sensor}
 
-                <td>
+        </strong>
 
-                    ${sensor.temperatura}°C
+        <span>
 
-                </td>
+          ${sensor.valor}
 
-                <td class="d-flex gap-2">
+        </span>
 
-                    <button
-                        class="btn btn-warning btn-sm"
-                        onclick="abrirModalEdicao(
-                            ${sensor.id},
-                            '${sensor.nome}',
-                            '${sensor.localizacao}',
-                            '${sensor.status}',
-                            '${sensor.temperatura}'
-                        )">
+      </div>
 
-                        Editar
+    `
 
-                    </button>
-
-                    <button
-                        class="btn btn-danger btn-sm"
-                        onclick="deletarSensor(${sensor.id})">
-
-                        Excluir
-
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `;
-    });
+})
 }
 
 function atualizarDashboard(sensores) {
@@ -253,49 +243,6 @@ function atualizarGrafico(sensores) {
     });
 }
 
-form.addEventListener('submit', async (e) => {
-
-    e.preventDefault();
-
-    const sensor = {
-
-        nome: document.getElementById(
-            'nome'
-        ).value,
-
-        localizacao: document.getElementById(
-            'localizacao'
-        ).value,
-
-        status: document.getElementById(
-            'status'
-        ).value,
-
-        temperatura: document.getElementById(
-            'temperatura'
-        ).value
-
-    };
-
-    await fetch(api, {
-
-        method: 'POST',
-
-        headers: {
-
-            'Content-Type': 'application/json'
-
-        },
-
-        body: JSON.stringify(sensor)
-
-    });
-
-    form.reset();
-
-    carregarSensores();
-
-});
 
 async function deletarSensor(id) {
 
@@ -393,20 +340,6 @@ async function salvarEdicao() {
 
 }
 
-pesquisa.addEventListener('input', () => {
-
-    const valor = pesquisa.value.toLowerCase();
-
-    const filtrados = sensoresGlobais.filter(
-        sensor =>
-            sensor.nome
-                .toLowerCase()
-                .includes(valor)
-    );
-
-    renderizarTabela(filtrados);
-
-});
 
 async function carregarDispositivos() {
 
@@ -419,7 +352,7 @@ async function carregarDispositivos() {
 
     const sensores =
       await response.json()
-      console.log(sensores[0])
+      console.log(sensores)
 
     totalSensores.innerText =
       sensores.length
@@ -444,9 +377,20 @@ async function carregarDispositivos() {
 
     cardsSensores.innerHTML = ''
 
+const ultimoRegistro =
+  sensores.reduce(
+    (maisNovo, atual) =>
+
+      new Date(atual.created_at) >
+      new Date(maisNovo.created_at)
+
+        ? atual
+        : maisNovo
+  )
+
 const ultimaAtualizacao =
   new Date(
-    sensores[0].created_at
+    ultimoRegistro.created_at
   )
 
 const agora =
@@ -457,47 +401,117 @@ const diferencaSegundos =
   / 1000
 
 const online =
-  diferencaSegundos <= 30
+  diferencaSegundos <= 90
+
+  console.log(
+  'Agora:',
+  agora
+)
+
+console.log(
+  'Ultima atualização:',
+  ultimaAtualizacao
+)
+
+console.log(
+  'Diferença:',
+  diferencaSegundos
+)
+
+console.log(
+  'Online:',
+  online
+)
 
 let html = `
 
-  <div class="card shadow border-0">
+<div class="card shadow border-0 mb-4">
 
-    <div class="card-body">
+  <div class="card-body">
+
+    <div
+      class="d-flex justify-content-between"
+    >
 
       <h3>
-        📱 iPhone 14
+        📱 ${sensores[0].dispositivo}
       </h3>
 
-      <p
-        style="
-          font-weight:bold;
-          color:${
-            online
-              ? 'green'
-              : 'red'
-          };
-        "
+      <span
+        class="badge ${
+          online
+            ? 'bg-success'
+            : 'bg-danger'
+        }"
       >
 
         ${
           online
-            ? '🟢 Online'
-            : '🔴 Offline'
+            ? '🟢 ONLINE'
+            : '🔴 OFFLINE'
         }
 
-      </p>
+      </span>
 
-      <small>
+    </div>
 
-        Última atualização:
-        ${ultimaAtualizacao.toLocaleString()}
-
-      </small>
-
-      <hr>
+    <hr>
 
 `
+
+sensores.forEach(sensor => {
+
+  let icone = '📡'
+
+  if (sensor.sensor === 'Bateria')
+    icone = '🔋'
+
+  if (sensor.sensor === 'Internet')
+    icone = '🌐'
+
+  if (sensor.sensor === 'Energia')
+    icone = '⚡'
+
+  if (sensor.sensor === 'Sistema')
+    icone = '📲'
+
+  if (sensor.sensor === 'Modelo')
+    icone = '📱'
+
+  html += `
+
+<div class="mb-2">
+
+  <strong>
+
+    ${icone}
+    ${sensor.sensor}:
+
+  </strong>
+
+  ${sensor.valor}
+
+</div>
+
+`
+
+  html += `
+
+<hr>
+
+<div class="text-muted">
+
+  🕒 Última atualização
+
+  <br>
+
+  ${ultimaAtualizacao.toLocaleTimeString()}
+
+</div>
+
+`
+
+})
 
     cardsSensores.innerHTML =
       html
@@ -530,3 +544,11 @@ function logout() {
     'login.html'
 
 }
+
+carregarDispositivos()
+
+setInterval(() => {
+
+  carregarDispositivos()
+
+}, 5000)
