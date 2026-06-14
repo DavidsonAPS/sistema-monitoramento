@@ -4,6 +4,7 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native'
 
 interface Sensor {
@@ -17,11 +18,15 @@ interface Sensor {
 interface Props {
   sensores: Sensor[]
   loading: boolean
+  internetSimulada: boolean
+  simularDesconexao: () => void
 }
 
 export function SensorList({
   sensores,
   loading,
+  internetSimulada,
+  simularDesconexao,
 }: Props) {
 
   if (loading) {
@@ -133,11 +138,62 @@ export function SensorList({
                     {sensor.sensor}
                   </Text>
 
-                  <Text
-                    style={styles.sensorValue}
-                  >
-                    {sensor.valor}
-                  </Text>
+                  <View
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  }}
+>
+
+  <Text
+    style={styles.sensorValue}
+  >
+    {
+      sensor.sensor === 'Internet' &&
+      internetSimulada
+
+        ? 'Offline'
+
+        : sensor.valor
+    }
+  </Text>
+
+  {
+    sensor.sensor === 'Internet' && (
+
+      <TouchableOpacity
+        onPress={simularDesconexao}
+        style={{
+          backgroundColor: '#EF4444',
+          paddingHorizontal: 6,
+          paddingVertical: 1,
+          borderRadius: 6,
+        }}
+      >
+
+        <Text
+          style={{
+            color: '#FFF',
+            fontSize: 8,
+            fontWeight: 'bold',
+          }}
+        >
+          {
+  internetSimulada
+
+    ? 'Reconectar'
+
+    : 'Desligar a internet'
+}
+        </Text>
+
+      </TouchableOpacity>
+
+    )
+  }
+
+</View>
 
                 </View>
 

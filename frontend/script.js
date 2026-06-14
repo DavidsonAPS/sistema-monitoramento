@@ -352,7 +352,8 @@ async function carregarDispositivos() {
 
     const sensores =
       await response.json()
-      console.log(sensores)
+
+    console.log(sensores)
 
     totalSensores.innerText =
       sensores.length
@@ -360,158 +361,134 @@ async function carregarDispositivos() {
     ativos.innerText =
       sensores.filter(
         s =>
-          s.status
-            .toLowerCase()
-            .includes('ativo')
-            ||
-          s.status
-            .toLowerCase()
-            .includes('conectado')
+          s.status.toLowerCase().includes('ativo')
+          ||
+          s.status.toLowerCase().includes('conectado')
       ).length
 
     inativos.innerText =
       sensores.length -
       Number(ativos.innerText)
 
-    cardsSensores.innerHTML = ''
+    const ultimoRegistro =
+      sensores.reduce(
+        (maisNovo, atual) =>
 
-    cardsSensores.innerHTML = ''
+          new Date(atual.created_at) >
+          new Date(maisNovo.created_at)
 
-const ultimoRegistro =
-  sensores.reduce(
-    (maisNovo, atual) =>
+            ? atual
+            : maisNovo
+      )
 
-      new Date(atual.created_at) >
-      new Date(maisNovo.created_at)
+    const ultimaAtualizacao =
+      new Date(
+        ultimoRegistro.created_at
+      )
 
-        ? atual
-        : maisNovo
-  )
+    const agora =
+      new Date()
 
-const ultimaAtualizacao =
-  new Date(
-    ultimoRegistro.created_at
-  )
+    const diferencaSegundos =
+      (agora - ultimaAtualizacao)
+      / 1000
 
-const agora =
-  new Date()
+    const online =
+      diferencaSegundos <= 90
 
-const diferencaSegundos =
-  (agora - ultimaAtualizacao)
-  / 1000
+    let html = `
 
-const online =
-  diferencaSegundos <= 90
+      <div class="card shadow border-0 mb-4">
 
-  console.log(
-  'Agora:',
-  agora
-)
+        <div class="card-body">
 
-console.log(
-  'Ultima atualização:',
-  ultimaAtualizacao
-)
+          <div class="d-flex justify-content-between">
 
-console.log(
-  'Diferença:',
-  diferencaSegundos
-)
+            <h3>
+              📱 ${sensores[0].dispositivo}
+            </h3>
 
-console.log(
-  'Online:',
-  online
-)
+            <span
+              class="badge ${
+                online
+                  ? 'bg-success'
+                  : 'bg-danger'
+              }"
+            >
 
-let html = `
+              ${
+                online
+                  ? '🟢 ONLINE'
+                  : '🔴 OFFLINE'
+              }
 
-<div class="card shadow border-0 mb-4">
+            </span>
 
-  <div class="card-body">
+          </div>
 
-    <div
-      class="d-flex justify-content-between"
-    >
+          <hr>
 
-      <h3>
-        📱 ${sensores[0].dispositivo}
-      </h3>
+    `
 
-      <span
-        class="badge ${
-          online
-            ? 'bg-success'
-            : 'bg-danger'
-        }"
-      >
+    sensores.forEach(sensor => {
 
-        ${
-          online
-            ? '🟢 ONLINE'
-            : '🔴 OFFLINE'
-        }
+      let icone = '📡'
 
-      </span>
+      if (sensor.sensor === 'Bateria')
+        icone = '🔋'
 
-    </div>
+      if (sensor.sensor === 'Internet')
+        icone = '🌐'
 
-    <hr>
+      if (sensor.sensor === 'Energia')
+        icone = '⚡'
 
-`
+      if (sensor.sensor === 'Sistema')
+        icone = '📲'
 
-sensores.forEach(sensor => {
+      if (sensor.sensor === 'Modelo')
+        icone = '📱'
 
-  let icone = '📡'
+      html += `
 
-  if (sensor.sensor === 'Bateria')
-    icone = '🔋'
+<div class="row mb-2">
 
-  if (sensor.sensor === 'Internet')
-    icone = '🌐'
+  <div class="col-4">
 
-  if (sensor.sensor === 'Energia')
-    icone = '⚡'
+    <strong>
+      ${icone} ${sensor.sensor}
+    </strong>
 
-  if (sensor.sensor === 'Sistema')
-    icone = '📲'
+  </div>
 
-  if (sensor.sensor === 'Modelo')
-    icone = '📱'
+  <div class="col-8">
 
-  html += `
+    ${sensor.valor}
 
-<div class="mb-2">
-
-  <strong>
-
-    ${icone}
-    ${sensor.sensor}:
-
-  </strong>
-
-  ${sensor.valor}
+  </div>
 
 </div>
 
 `
 
-  html += `
+    })
 
-<hr>
+    html += `
 
-<div class="text-muted">
+      <hr>
 
-  🕒 Última atualização
+      <div class="text-muted">
 
-  <br>
+        🕒 Última atualização:
+        ${ultimaAtualizacao.toLocaleTimeString()}
 
-  ${ultimaAtualizacao.toLocaleTimeString()}
+      </div>
 
-</div>
+      </div>
 
-`
+      </div>
 
-})
+    `
 
     cardsSensores.innerHTML =
       html

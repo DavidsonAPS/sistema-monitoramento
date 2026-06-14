@@ -2,12 +2,42 @@ import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
+  Alert,
 } from 'react-native'
+
+import { useState } from 'react'
 
 import { useSensores } from '../../hooks/useSensores'
 import { SensorList } from '../../components/SensorList'
 
 export default function HomeScreen() {
+
+  const [internetSimulada, setInternetSimulada] =
+  useState(false)
+
+const simularDesconexao = () => {
+
+  const novoEstado =
+    !internetSimulada
+
+  setInternetSimulada(
+    novoEstado
+  )
+
+  Alert.alert(
+
+    'Modo Demonstração',
+
+    novoEstado
+
+      ? 'Internet simulada como OFFLINE. \n\n Por questões de segurança do Android e iOS, aplicativos não podem desligar Wi-Fi ou dados móveis diretamente.'
+
+      : 'Internet Online.',
+
+  )
+
+}
 
   const {
     sensores,
@@ -75,18 +105,6 @@ export default function HomeScreen() {
 
           </View>
 
-          <View style={styles.statCard}>
-
-            <Text style={styles.statValue}>
-              {disponibilidade}%
-            </Text>
-
-            <Text style={styles.statLabel}>
-              Disponibilidade
-            </Text>
-
-          </View>
-
         </View>
 
         {error && (
@@ -102,6 +120,8 @@ export default function HomeScreen() {
       <SensorList
         sensores={sensores}
         loading={loading}
+        internetSimulada={internetSimulada}
+        simularDesconexao={simularDesconexao}
       />
 
     </View>
@@ -209,5 +229,30 @@ const styles = StyleSheet.create({
     marginTop: 12,
 
   },
+
+    botaoInternet: {
+
+    backgroundColor: '#2563EB',
+
+    marginTop: 20,
+
+    padding: 14,
+
+    borderRadius: 16,
+
+    alignItems: 'center',
+
+  },
+
+  textoBotao: {
+
+    color: '#FFFFFF',
+
+    fontSize: 15,
+
+    fontWeight: '700',
+
+  },
+
 
 })
